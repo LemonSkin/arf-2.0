@@ -1,0 +1,34 @@
+Login -> Auth. User -> Set Cookie
+/some/page ---Cookie in request---> Auth. User
+
+
+Home
+    LAYOUT
+    * Two main boxes:
+        1. Assigned reviews
+        2. My reviews
+    LOGIC
+    * If user not logged in, redirect to /login page
+
+Submit Review
+    LAYOUT
+    * Stuff to submit a review
+    LOGIC
+    * If user not logged in, redirect to /login page
+
+Search
+    LAYOUT
+    * Stuff to search database
+    LOGIC
+    * Anyone can access, even if not logged in
+
+About
+    LAYOUT
+    * About the project
+    LOGIC
+    * Anyone can access, even if not logged in
+
+Login/Logout (should change depending on state of user session)
+    LOGIC
+    * Pressing logout should log the user out and take to landing page
+    * If user logged out, the nav bar should say login
