@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, getDocs, setDoc, doc } from 'firebase/firestore'
+import { getFirestore, collection, getDocsFromServer, getDocs, setDoc, doc, getDoc, query, where } from 'firebase/firestore'
+import { stringify } from 'postcss';
 
 const firebaseConfig = {
 	apiKey: "AIzaSyDH5102hbHQBtMhOhitexi216MjrokDAFw",
@@ -9,64 +10,41 @@ const firebaseConfig = {
 	messagingSenderId: "15914292282",
 	appId: "1:15914292282:web:c23873b6422f98e3b39103"
 	};
+
 	// init firebase app
 initializeApp(firebaseConfig);
 
-	// init services
+export class UserData {
+	username?: string;
+	role?: string;
+}
+
+// init services
 export const db = getFirestore();
 
-export async function register_user(username: string, password: string) {
-	let colRef = collection(db, "users");
-	let userAdded: boolean = true;
-	await getDocs(colRef)
-		.then(function (snapshot) {
-			for (var i = 0; i < snapshot.docs.length; i++) {
-				if (snapshot.docs[i].id === username) {
-					userAdded = false;
-					break;
-				}
-			}
-			if (userAdded) {
-				setDoc(doc(db, "users", username), {
-					alias: null,
-					password: password,
-					role: "user"
-				});
-			}
-
-			// //Function returns true if username is not found
-			// if(snapshot.docs.every(function (doc) { 
-			// 	//Loop over usernames, fails when encounters taken username
-			// 	if (doc.data()['username'] != username) {
-			// 		return true;
-			// 	}
-			// })) {
-			// 	console.log("Adding", username, "to database")
-			// 	addDoc(colRef, {username: username, password: password, alias: null})
-			// 	userAdded = true;
-			// }
-		})
-		.catch(function (err) {
-			console.log(err.message);
-		});
-		return userAdded;
-};
-
 export async function login_user(username: string, password: string) {
-	let colRef = collection(db, "users");
-	let userAuthenticated: boolean = false;
-	await getDocs(colRef)
-		.then(function (snapshot) {
-			for (var i = 0; i < snapshot.docs.length; i++) {
-				if (snapshot.docs[i].data()['username'] === username && 
-					snapshot.docs[i].data()['password'] === password) {
-						userAuthenticated = true;
-						break;
-					}
-			}
-		})
-		.catch(function (err) {
-			console.log(err.message);
-		});
-		return userAuthenticated;
+	const docRef = doc(db, "users", username);
+	const docSnap = await getDoc(docRef);
+	if (docSnap.exists() && docSnap.data()['password'] === password) {
+	
+		return true;
+	}
+	return false;
+}
+
+export async function set_user_auth_token(username: string, uuid: string) {
+	const docRef = doc(db, "users", username);
+	await setDoc(doc(db, "users", username), {session: uuid}, {merge: true});
+}
+
+export async function get_user_session(uuid: string) {
+	let userData: UserData = new UserData();
+	const q = query(collection(db, "users"), where("session", "==", uuid));
+	const querySnapshot = await getDocs(q);
+	if(querySnapshot.empty) {
+		return userData;
+	};
+	userData.username = querySnapshot.docs[0].id;
+	userData.role = querySnapshot.docs[0].data()["role"]
+	return userData;
 }

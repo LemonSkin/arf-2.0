@@ -5,3 +5,11 @@
 <h1 class="text-center text-4xl p-4">
     Welcome to Artefact Review System Extended (ARSE)
 </h1>
+
+<div>
+    Box one
+</div>
+
+<div>
+    Box two
+</div>

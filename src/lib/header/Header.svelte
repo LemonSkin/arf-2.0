@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/stores'
 </script>
 
 <header>
@@ -16,9 +16,17 @@
 			<div class="mx-12 text-3xl py-2">Artefact Review System Extended</div>
 			<div class="flex-1 flex justify-center mr-auto">
 				<a class="mx-2 hover:text-red-500">About</a>
-				<a href="/login" class="mx-2 hover:text-red-500">Login</a>
+				{#if $page.data.user === undefined}
+				 	<a href="/login" class="mx-2 hover:text-red-500">Login</a>
+				 {:else}
+					<form action="/logout" method="POST" class="mx-2 hover:text-red-500">
+						<button type="submit">Log out</button>
+					</form>
+					{#if $page.data.user.role === 'admin'}
+						<a class="mx-2 hover:text-red-500">Admin</a>
+					{/if}
+				{/if}
 			</div>
-
 		</nav>
 
 </header>
