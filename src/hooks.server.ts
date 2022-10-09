@@ -1,25 +1,23 @@
 import type { Handle } from '@sveltejs/kit'
 
-import { get_user_session } from '$lib/database'
+import { db } from '$lib/database'
+import { query, collection, where, getDocs } from 'firebase/firestore'
 
 export const handle: Handle = async ({ event, resolve }) => {
     // Read the cookie for the current session
     const session = event.cookies.get('session')
     
-    // If no session exists then just chill
+    // If no session exists then do nothing
     if (!session) {
         return await resolve(event)
     }
 
-    // Get the user that owns the cookie
-    const user = await get_user_session(session);
-
-    if (user) {
-        event.locals.user = {
-            name: user.username,
-            role: user.role
-        }
-    }
+    const q = query(collection(db, "users"), where("session", "==", session));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+        event.locals.user = {name: doc.id, 
+                            role: doc.data()["role"]}
+    });
 
     return await resolve(event)
 }
