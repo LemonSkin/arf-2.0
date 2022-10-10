@@ -16,7 +16,7 @@
         <label for="username">
             Username:
         </label>
-        <input id="username" name="username" type="text" required 
+        <input name="username" type="text" value={form?.username ?? ''} required 
             class="border-2 bg-slate-200">
     </div> 
 
@@ -24,7 +24,7 @@
         <label for="password">
             Password:
         </label>
-        <input id="password" name="password" type="password" required 
+        <input name="password" type="password" required 
             class="border-2 bg-slate-200">
     </div>
 

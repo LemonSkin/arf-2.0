@@ -1,15 +1,16 @@
 <script lang="ts">
-    import type { PageData } from "./$types"
+    import type { PageData, ActionData } from "./$types"
     export let data: PageData;
     $: projects = data.projects;
     $: categories = data.categories;
     $: users = data.users;
+    export let form: ActionData;
 
-    let selectedCategory: string;
+    let selectedCategory: string = form?.category ?? 'blank';
     
     const roles: string[] = ["Design Reviewer", "Peer Reviewer", "Approver", "Information"];
     // Initialise blank reviewer list
-    let reviewers = [{id: "blank", role: "blank"}];
+    let reviewers = form?.reviewersN ?? [{id: "blank", role: "blank"}];
     function addReviewer() {
         // Add a new blank reviewer
         reviewers.push({id: "blank", role: "blank"});
@@ -17,7 +18,7 @@
         reviewers = reviewers;
     }
 
-    let filesUnderReview = [{id: "File 1", path: ""}]
+    let filesUnderReview = form?.filesN ?? [{id: "File 1", path: ""}]
     function addFile() {
         filesUnderReview.push({id: "File "+(filesUnderReview.length+1), path:""});
         filesUnderReview = filesUnderReview;
@@ -29,15 +30,19 @@
 </h1>
 
 <div>
+    {#if form?.submissionFailed}
+        <p>Failed to submit review!</p>
+    {/if}
     <form action="?/submit" method="POST">
+    <!-- <form action="?/submit" on:submit|preventDefault={handleSubmit} method="POST"> -->
         <div class="py-1">
             <label for="review_title"> Review Title: </label>
             <!-- Shouldn't need ID but do need name to get formData() on server -->
-            <input name="review_title" type="text" required 
+            <input name="review_title" type="text" value={form?.title ?? ''} required 
                 class="border-2 bg-slate-200">
 
             <label for="project">Project:</label>
-            <select name="project">
+            <select name="project" value={form?.project ?? "blank"}>
                 <option value="blank">Please choose a project</option>
                 {#each projects as project}
                     <option value={project}>{project}</option>
@@ -102,6 +107,8 @@
                 </button>
             </div>
         </div>
+        <p>Instructions:</p>
+        <textarea name="instructions"></textarea>
 
         <div>
             <button type="submit" 

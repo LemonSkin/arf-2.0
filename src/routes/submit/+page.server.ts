@@ -3,8 +3,6 @@ import type { Action, Actions, PageServerLoad } from './$types'
 import { db } from '$lib/database'
 import { getDocs, collection } from 'firebase/firestore'
 
-
-
 export const load: PageServerLoad = async ({ locals }) => {
     
     if (locals.user === undefined) {
@@ -36,15 +34,27 @@ const submit: Action = async ({ request }) => {
     const data = await request.formData();
     const title = data.get('review_title');
     const project = data.get('project');
-    const category = data.get('category')
-    const reviewers = data.getAll('reviewers')
-    const reviewRoles = data.getAll('roles')
-    const files = data.getAll('files')
+    const category = data.get('category');
+    const reviewers = data.getAll('reviewers');
+    const reviewRoles = data.getAll('roles');
+    const files = data.getAll('files');
+    const instructions = data.get('instructions');
+
+    let reviewersN = [];
+    for(let i = 0; i < reviewers.length; i++) {
+        reviewersN[i] = {id: reviewers[i], role: reviewRoles[i]}
+    }
+
+    let filesN = [];
+    for(let i = 0; i < files.length; i++) {
+        filesN[i] = {id: "File "+(i+1), path: files[i]}
+    }
 
     console.log(reviewers, reviewRoles);
-    console.log(files)
+    // console.log(files);
+    // console.log(instructions);
 
-    return invalid(400, {submissionFailed: true})
+    return invalid(400, {reviewersN, filesN, title, category, project, submissionFailed: true})
 }
 
 export const actions: Actions = { submit }

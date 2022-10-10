@@ -66,7 +66,8 @@ const login: Action = async ({ cookies, request }) => {
 
 			throw redirect(303, '/');
 	}
-	return invalid(400, {loginFailed: true});
+	//Return the username so that the form repopulates
+	return invalid(400, {username, loginFailed: true});
 }
 
 export const actions: Actions = { register, login }
