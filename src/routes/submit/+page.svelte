@@ -6,7 +6,8 @@
     $: users = data.users;
     export let form: ActionData;
 
-    let selectedCategory: string = form?.category ?? 'blank';
+    let selectedCategory: string = form?.category ?? "blank";
+    let selectedProject: string = form?.project ?? "blank";
     
     const roles: string[] = ["Design Reviewer", "Peer Reviewer", "Approver", "Information"];
     // Initialise blank reviewer list
@@ -38,11 +39,12 @@
         <div class="py-1">
             <label for="review_title"> Review Title: </label>
             <!-- Shouldn't need ID but do need name to get formData() on server -->
-            <input name="review_title" type="text" value={form?.title ?? ''} required 
+            <input name="review_title" type="text" value={form?.title ?? ''} 
                 class="border-2 bg-slate-200">
 
             <label for="project">Project:</label>
-            <select name="project" value={form?.project ?? "blank"}>
+            <!-- <select name="project" value={form?.project ?? "blank"}> -->
+            <select name="project" bind:value={selectedProject}>
                 <option value="blank">Please choose a project</option>
                 {#each projects as project}
                     <option value={project}>{project}</option>
@@ -50,7 +52,8 @@
             </select>
 
             <label for="category">Category:</label>
-            <select name="category" bind:value={selectedCategory} >
+            <!-- <select name="category" value={form?.project ?? "blank"}> -->
+            <select name="category" value={selectedCategory}>    
                 <option value="blank">Please choose a category</option>
                 {#each categories as category}
                     <option value={category}>{category}</option>
@@ -64,7 +67,7 @@
         </div>
 
         <div>
-            <!-- Allow only one DE and APP, multiple INF and PEER -->
+            <!-- TODO: Allow only one DE and APP, multiple INF and PEER -->
             <p>Reviewers:</p>
             {#each reviewers as reviewer, i}
                 <div>
@@ -108,8 +111,7 @@
             </div>
         </div>
         <p>Instructions:</p>
-        <textarea name="instructions"></textarea>
-
+        <textarea name="instructions">{form?.instructions ?? ''}</textarea>
         <div>
             <button type="submit" 
             class="ml-1 rounded-lg border-2 bg-slate-200">

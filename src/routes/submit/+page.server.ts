@@ -1,7 +1,7 @@
 import { invalid, redirect } from '@sveltejs/kit'
 import type { Action, Actions, PageServerLoad } from './$types'
 import { db } from '$lib/database'
-import { getDocs, collection } from 'firebase/firestore'
+import { getDocs, collection, doc, getDoc, setDoc } from 'firebase/firestore'
 
 export const load: PageServerLoad = async ({ locals }) => {
     
@@ -12,7 +12,8 @@ export const load: PageServerLoad = async ({ locals }) => {
     const projects: string[] = [];
     const projectsSnapshot = await getDocs(collection(db, "projects"));
     projectsSnapshot.forEach((doc) => {
-        projects.push(doc.id);
+        // projects.push(doc.id);
+        projects.push(doc.data()['alias'])
     });
 
     const categories: string[] = [];
@@ -24,7 +25,14 @@ export const load: PageServerLoad = async ({ locals }) => {
     const users: string[] = [];
     const usersSnapshot = await getDocs(collection(db, "users"));
     usersSnapshot.forEach((doc) => {
-        users.push(doc.id);
+        
+        if (doc.data()['alias']) {
+            //Push alias to list if it exists
+            users.push(doc.data()['alias'])
+        } else {
+            //Otherwise just push user id
+            users.push(doc.id);
+        }
     });
 
     return {projects, categories, users}
@@ -40,21 +48,47 @@ const submit: Action = async ({ request }) => {
     const files = data.getAll('files');
     const instructions = data.get('instructions');
 
-    let reviewersN = [];
+    let reviewersN: any = [];
     for(let i = 0; i < reviewers.length; i++) {
         reviewersN[i] = {id: reviewers[i], role: reviewRoles[i]}
     }
 
-    let filesN = [];
+    let filesN: any = [];
     for(let i = 0; i < files.length; i++) {
         filesN[i] = {id: "File "+(i+1), path: files[i]}
     }
+    // console.log(String(project).toUpperCase()+"."+String(category).toUpperCase());
 
-    console.log(reviewers, reviewRoles);
-    // console.log(files);
-    // console.log(instructions);
+    let categoryPath = String("projects/"+project+"/categories/"+category).toLowerCase();
+    console.log(categoryPath);
+    const categoryRef = doc(db, categoryPath);
+    const docSnap = await getDoc(categoryRef);
+    let categoryCount = 0;
+    //Test if the project has the appropriate type of review category
+    if(docSnap.exists()) {
+        // Set the category count if category exists
+        categoryCount = docSnap.data()['count'];
+    } else {
+        //Initialise the category to begin accepting reviews
+        await setDoc(doc(db, categoryPath), {
+            count: categoryCount
+        }).catch(error => {
+            return invalid(400, {reviewersN, filesN, title, category, project, instructions, submissionFailed: true});
+        });
+    }
 
-    return invalid(400, {reviewersN, filesN, title, category, project, submissionFailed: true})
+    const reviewReference = String(project+"."+category+"."+String(++categoryCount));
+    const reviewPath = categoryPath+"/reviews";
+    const reviewRef = doc(db, reviewPath, reviewReference);
+    await setDoc(reviewRef, {
+        title: title
+    });
+    await setDoc(categoryRef, {
+        count: categoryCount
+    })
+    
+    return invalid(400, {reviewersN, filesN, title, category, project, instructions, submissionFailed: true})
+    // return invalid(400, {submissionFailed: true})
 }
 
 export const actions: Actions = { submit }

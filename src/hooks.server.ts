@@ -19,5 +19,5 @@ export const handle: Handle = async ({ event, resolve }) => {
                             role: doc.data()["role"]}
     });
 
-    return await resolve(event)
+    return await resolve(event);
 }

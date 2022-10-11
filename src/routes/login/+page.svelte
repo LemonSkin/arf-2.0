@@ -24,7 +24,7 @@
         <label for="password">
             Password:
         </label>
-        <input name="password" type="password" required 
+        <input name="password" placeholder="password" type="password" required 
             class="border-2 bg-slate-200">
     </div>
 
