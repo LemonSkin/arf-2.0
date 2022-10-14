@@ -1,16 +1,20 @@
 <script lang="ts">
     import type { PageData, ActionData } from "./$types"
+    import { enhance } from '$app/forms'
+    import { onMount } from "svelte"
     export let data: PageData;
     $: projects = data.projects;
     $: categories = data.categories;
     $: users = data.users;
+    
     export let form: ActionData;
-
     let selectedCategory: string = form?.category ?? "blank";
     let selectedProject: string = form?.project ?? "blank";
     
+    //Used for the roles dropdown list
     const roles: string[] = ["Design Reviewer", "Peer Reviewer", "Approver", "Information"];
-    // Initialise blank reviewer list
+    
+    // Initialise blank reviewer list or populate if last submission attempt failed
     let reviewers = form?.reviewersN ?? [{id: "blank", role: "blank"}];
     function addReviewer() {
         // Add a new blank reviewer
@@ -19,13 +23,41 @@
         reviewers = reviewers;
     }
 
+    // Initialise blank files under review list or populate if last submission attempt failed
     let filesUnderReview = form?.filesN ?? [{id: "File 1", path: ""}]
     function addFile() {
+        // Add a new blank file
         filesUnderReview.push({id: "File "+(filesUnderReview.length+1), path:""});
+        // Ressign to so that it updates on page
         filesUnderReview = filesUnderReview;
     }
+
+    let editor: any;
+    let quill: any;
+    let toolbarOptions = [
+        [{ header: 1 }, { header: 2 }, "blockquote", "link",],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ align: [] }],
+        ["clean"],
+    ];
+    onMount(async () => {
+        const { default: Quill } = await import("quill");
+       quill = new Quill(editor, {
+        modules: {
+            toolbar: toolbarOptions
+        },
+        theme: "snow",
+        placeholder: "Instructions"
+        });
+    });
 </script>
 
+<svelte:head>
+    <link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+</svelte:head>
+
+<main>
 <h1 class="text-center text-4xl p-4">
     Submit a Review
 </h1>
@@ -34,12 +66,15 @@
     {#if form?.submissionFailed}
         <p>Failed to submit review!</p>
     {/if}
-    <form action="?/submit" method="POST">
-    <!-- <form action="?/submit" on:submit|preventDefault={handleSubmit} method="POST"> -->
+    <form action="?/submit" method="POST" use:enhance={({ data }) => {
+        data.set('instructions', JSON.stringify(quill.getContents()['ops']));
+    }}
+    >
+        <!-- <form action="?/submit" on:submit|preventDefault={handleSubmit} method="POST"> -->
         <div class="py-1">
             <label for="review_title"> Review Title: </label>
             <!-- Shouldn't need ID but do need name to get formData() on server -->
-            <input name="review_title" type="text" value={form?.title ?? ''} 
+            <input name="review_title" type="text" value={form?.title ?? ''}  required
                 class="border-2 bg-slate-200">
 
             <label for="project">Project:</label>
@@ -110,8 +145,11 @@
                 </button>
             </div>
         </div>
-        <p>Instructions:</p>
-        <textarea name="instructions">{form?.instructions ?? ''}</textarea>
+            <p>Instructions:</p>
+        <!-- <textarea name="instructions">{form?.instructions ?? ''}</textarea> -->
+        <div class="editor-wrapper">
+            <div bind:this={editor} />
+        </div>
         <div>
             <button type="submit" 
             class="ml-1 rounded-lg border-2 bg-slate-200">
@@ -120,3 +158,4 @@
         </div>
     </form>
 </div>
+</main>

@@ -4,10 +4,10 @@ import type { Action, Actions, PageServerLoad } from './$types'
 import { db } from '$lib/database'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 
-enum Roles {
-	ADMIN = 'ADMIN',
-	USER = 'USER',
-}
+// enum Roles {
+// 	ADMIN = 'ADMIN',
+// 	USER = 'USER',
+// }
 
 export const load: PageServerLoad = async ({ locals }) => {
     if (locals.user) {

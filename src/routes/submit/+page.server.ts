@@ -57,14 +57,17 @@ const submit: Action = async ({ request }) => {
     for(let i = 0; i < files.length; i++) {
         filesN[i] = {id: "File "+(i+1), path: files[i]}
     }
-    // console.log(String(project).toUpperCase()+"."+String(category).toUpperCase());
+
+    if (title.length < 3 ) {
+        return invalid(400, {reviewersN, filesN, title, category, project, submissionFailed: true});
+    }
 
     let categoryPath = String("projects/"+project+"/categories/"+category).toLowerCase();
     console.log(categoryPath);
     const categoryRef = doc(db, categoryPath);
     const docSnap = await getDoc(categoryRef);
     let categoryCount = 0;
-    //Test if the project has the appropriate type of review category
+    // Test if the project has the appropriate type of review category
     if(docSnap.exists()) {
         // Set the category count if category exists
         categoryCount = docSnap.data()['count'];
@@ -73,7 +76,7 @@ const submit: Action = async ({ request }) => {
         await setDoc(doc(db, categoryPath), {
             count: categoryCount
         }).catch(error => {
-            return invalid(400, {reviewersN, filesN, title, category, project, instructions, submissionFailed: true});
+            return invalid(400, {reviewersN, filesN, title, category, project, instructions, submissionFailed: true, error: error});
         });
     }
 
@@ -82,13 +85,17 @@ const submit: Action = async ({ request }) => {
     const reviewRef = doc(db, reviewPath, reviewReference);
     await setDoc(reviewRef, {
         title: title
+    }).catch(error => {
+        return invalid(400, {reviewersN, filesN, title, category, project, instructions, submissionFailed: true, error: error});
     });
     await setDoc(categoryRef, {
         count: categoryCount
-    })
+    }).catch(error => {
+        return invalid(400, {reviewersN, filesN, title, category, project, instructions, submissionFailed: true, error: error});
+    });
     
-    return invalid(400, {reviewersN, filesN, title, category, project, instructions, submissionFailed: true})
-    // return invalid(400, {submissionFailed: true})
+    console.log("redirecting...");
+    throw redirect(302, '/');
 }
 
 export const actions: Actions = { submit }

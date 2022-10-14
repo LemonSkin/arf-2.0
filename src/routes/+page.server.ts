@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit'
 import { db } from '$lib/database'
-import { getDocs, collection, collectionGroup, query, where } from 'firebase/firestore'
+import { getDocs, collection, query, where } from 'firebase/firestore'
 import type { PageServerLoad } from './$types'
 
 type Review = {

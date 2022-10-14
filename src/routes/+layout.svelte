@@ -3,7 +3,7 @@
 	import Footer from '$lib/footer/Footer.svelte';
 	import '../app.css';
 
-	import { page } from '$app/stores'
+	// import { page } from '$app/stores'
 	// console.log($page.data.user)
 </script>
 
