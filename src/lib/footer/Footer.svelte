@@ -1,14 +1,16 @@
 <script lang="ts">
 </script>
 
-<footer>
-	<p>Copywrite Matthew C. Scriven 2022</p>
+<footer
+	class="fixed bottom-0 left-0 w-full flex p-2 bg-gradient-to-r from-airbus-blue to-airbus-blue-light2 text-white"
+>
+	<span class="text-sm">© 2022 Matthew C. Scriven. All Rights Reserved. </span>
 </footer>
 
-<style>
+<!-- <style>
 	footer p {
 		display: flex;
 		width: 100%;
 		justify-content: center;
 	}
-</style>
+</style> -->

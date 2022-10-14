@@ -21,7 +21,7 @@ const register: Action = async ({ request }) => {
 	const password = data.get('password');
 
 	if (typeof username !== 'string' || typeof password !== 'string' || !username || !password) {
-		return invalid(400, { invalid: true });
+		return invalid(400, { error: true, message: 'Something has gone horribly wrong.' });
 	}
 
 	const docRef = doc(db, 'users', username);
@@ -33,7 +33,7 @@ const register: Action = async ({ request }) => {
 		});
 		throw redirect(303, '/');
 	}
-	return invalid(400, { registrationFailed: true });
+	return invalid(400, { error: true, message: 'Username is taken.' });
 };
 
 const login: Action = async ({ cookies, request }) => {
@@ -42,7 +42,7 @@ const login: Action = async ({ cookies, request }) => {
 	const password = data.get('password');
 
 	if (typeof username !== 'string' || typeof password !== 'string' || !username || !password) {
-		return invalid(400, { invalid: true });
+		return invalid(400, { error: true, message: 'Something has gone horribly wrong.' });
 	}
 
 	const docRef = doc(db, 'users', username);
@@ -67,7 +67,7 @@ const login: Action = async ({ cookies, request }) => {
 		throw redirect(303, '/');
 	}
 	//Return the username so that the form repopulates
-	return invalid(400, { username, loginFailed: true });
+	return invalid(400, { username, error: true, message: 'Details incorrect.' });
 };
 
 export const actions: Actions = { register, login };

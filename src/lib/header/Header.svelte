@@ -8,14 +8,14 @@
 	</div> -->
 	<!-- <nav data-sveltekit-prefetch > -->
 	<nav
-		class="flex sticky top-0 w-screen bg-gradient-to-r from-airbus-blue to-airbus-blue-light2 text-white items-center"
+		class="sticky top-0 left-0 w-full flex p-2 bg-gradient-to-r from-airbus-blue to-airbus-blue-light2 text-white items-center"
 	>
 		<div class="flex-1 flex justify-center mr-auto">
 			<a href="/" class="mx-2 hover:text-red-500">Home</a>
 			<a href="/submit" class="mx-2 hover:text-red-500">Submit Review</a>
 			<p class="mx-2 hover:text-red-500">Search</p>
 		</div>
-		<div class="mx-12 text-3xl py-2">Artefact Review System Extended</div>
+		<div class="mx-12 text-3xl">Artefact Review System Extended</div>
 		<div class="flex-1 flex justify-center mr-auto">
 			<a href="/about" class="mx-2 hover:text-red-500">About</a>
 			{#if $page.data.user === undefined}

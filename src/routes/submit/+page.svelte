@@ -67,6 +67,7 @@
 		<form
 			action="?/submit"
 			method="POST"
+			autocomplete="off"
 			use:enhance={({ data }) => {
 				data.set('instructions', JSON.stringify(quill.getContents()['ops']));
 			}}

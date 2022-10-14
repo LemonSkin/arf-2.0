@@ -1,53 +1,52 @@
 <script lang="ts">
 	// import { enhance } from '$app/forms'
+	import Alert from '$lib/Alert.svelte';
 	import type { ActionData } from './$types';
 
 	export let form: ActionData;
+	let alertRef;
 </script>
 
-<h1 class="text-center text-4xl p-4">Log In/Register</h1>
+<main>
+	<h1 class="text-center text-4xl text-gray-900 mt-4">Log In/Register</h1>
 
-<form method="POST" autocomplete="off" class="text-lg p-2">
-	<div class="py-1">
-		<label for="username"> Username: </label>
-		<input
-			name="username"
-			type="text"
-			value={form?.username ?? ''}
-			required
-			class="border-2 bg-slate-200"
-		/>
-	</div>
+	<form method="POST" autocomplete="off" class="mt-10">
+		<div class="flex flex-row justify-center p-2">
+			<input
+				name="username"
+				type="text"
+				required
+				value={form?.username ?? ''}
+				placeholder="Username"
+				class="input input-primary input-bordered text-center w-1/2"
+			/>
+		</div>
 
-	<div class="py-1">
-		<label for="password"> Password: </label>
-		<input
-			name="password"
-			placeholder="password"
-			type="password"
-			required
-			class="border-2 bg-slate-200"
-		/>
-	</div>
+		<div class="flex flex-row justify-center p-2">
+			<input
+				type="password"
+				name="password"
+				required
+				value={form?.name ?? ''}
+				placeholder="Password"
+				class="input input-primary input-bordered text-center w-1/2"
+			/>
+		</div>
 
-	{#if form?.registrationFailed}
-		<p>Username is taken.</p>
-	{/if}
+		<div class="flex flex-row justify-center">
+			<button formaction="?/login" type="submit" class="m-1 btn btn-primary basis-1/4">
+				Login
+			</button>
+			<button formaction="?/register" type="submit" class="m-1 btn btn-primary basis-1/4">
+				Register
+			</button>
+		</div>
 
-	{#if form?.loginFailed}
-		<p>Details incorrect!</p>
-	{/if}
-
-	{#if form?.invalid}
-		<p>Something has gone horribly wrong</p>
-	{/if}
-
-	<div class="flex flex-row px-2 py-1">
-		<button formaction="?/login" type="submit" class="ml-1 rounded-lg border-2 bg-slate-200">
-			Login
-		</button>
-		<button formaction="?/register" type="submit" class="ml-1 rounded-lg border-2 bg-slate-200">
-			Register
-		</button>
-	</div>
-</form>
+		<div class="flex flex-row justify-center w-full">
+			{#if form?.error}
+				<!-- <Alert message="ERROR" /> -->
+				<Alert message={form?.message}/>
+			{/if}
+		</div>
+	</form>
+</main>
