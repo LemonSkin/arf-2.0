@@ -1,34 +1,35 @@
 <script lang="ts">
-	import { page } from '$app/stores'
+	import { page } from '$app/stores';
 </script>
 
 <header>
 	<!-- <div class="title">	
 		<h1>Artefact Review System Extended</h1>
 	</div> -->
-		<!-- <nav data-sveltekit-prefetch > -->
-		<nav class="flex sticky top-0 w-screen bg-gradient-to-r from-airbus-blue to-airbus-blue-light2 text-white items-center">
-			<div class="flex-1 flex justify-center mr-auto">
-				<a href="/" class="mx-2 hover:text-red-500">Home</a>
-				<a href="/submit" class="mx-2 hover:text-red-500">Submit Review</a>
-				<a class="mx-2 hover:text-red-500">Search</a>
-			</div>
-			<div class="mx-12 text-3xl py-2">Artefact Review System Extended</div>
-			<div class="flex-1 flex justify-center mr-auto">
-				<a  href="/about" class="mx-2 hover:text-red-500">About</a>
-				{#if $page.data.user === undefined}
-				 	<a href="/login" class="mx-2 hover:text-red-500">Login</a>
-				 {:else}
-					<form action="/logout" method="POST" class="mx-2 hover:text-red-500">
-						<button type="submit">Log out</button>
-					</form>
-					{#if $page.data.user.role === 'admin'}
-						<a class="mx-2 hover:text-red-500">Admin</a>
-					{/if}
+	<!-- <nav data-sveltekit-prefetch > -->
+	<nav
+		class="flex sticky top-0 w-screen bg-gradient-to-r from-airbus-blue to-airbus-blue-light2 text-white items-center"
+	>
+		<div class="flex-1 flex justify-center mr-auto">
+			<a href="/" class="mx-2 hover:text-red-500">Home</a>
+			<a href="/submit" class="mx-2 hover:text-red-500">Submit Review</a>
+			<p class="mx-2 hover:text-red-500">Search</p>
+		</div>
+		<div class="mx-12 text-3xl py-2">Artefact Review System Extended</div>
+		<div class="flex-1 flex justify-center mr-auto">
+			<a href="/about" class="mx-2 hover:text-red-500">About</a>
+			{#if $page.data.user === undefined}
+				<a href="/login" class="mx-2 hover:text-red-500">Login</a>
+			{:else}
+				<form action="/logout" method="POST" class="mx-2 hover:text-red-500">
+					<button type="submit">Log out</button>
+				</form>
+				{#if $page.data.user.role === 'admin'}
+					<p class="mx-2 hover:text-red-500">Admin</p>
 				{/if}
-			</div>
-		</nav>
-
+			{/if}
+		</div>
+	</nav>
 </header>
 
 <style>

@@ -1,5 +1,4 @@
 <script lang="ts">
-
 </script>
 
 <footer>
@@ -7,7 +6,7 @@
 </footer>
 
 <style>
-	footer p{
+	footer p {
 		display: flex;
 		width: 100%;
 		justify-content: center;
