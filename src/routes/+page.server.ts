@@ -1,7 +1,7 @@
-import { redirect } from '@sveltejs/kit';
 import { db } from '$lib/database';
 import { getDocs, collection, query, where } from 'firebase/firestore';
-import type { PageServerLoad } from './$types';
+import { invalid, redirect } from '@sveltejs/kit';
+import type { Action, Actions, PageServerLoad } from './$types';
 
 type Review = {
 	presenter?: string;
@@ -30,3 +30,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 		reviewing
 	};
 };
+
+const review: Action = async ({ request }) => {
+	const data = await request.formData();
+	const title = data.get('title');
+	console.log(title);
+
+	throw redirect(303, '/review/hello');
+};
+
+export const actions: Actions = { review };

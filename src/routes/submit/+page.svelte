@@ -8,20 +8,26 @@
 	$: users = data.users;
 
 	export let form: ActionData;
-	let selectedCategory: string = form?.category ?? 'blank';
-	let selectedProject: string = form?.project ?? 'blank';
 
 	//Used for the roles dropdown list
 	const roles: string[] = ['Design Reviewer', 'Peer Reviewer', 'Approver', 'Information'];
 
 	// Initialise blank reviewer list or populate if last submission attempt failed
-	let reviewers = form?.reviewersN ?? [{ id: 'blank', role: 'blank' }];
+	export let reviewers = form?.reviewersN ?? [{}];
 	function addReviewer() {
 		// Add a new blank reviewer
-		reviewers.push({ id: 'blank', role: 'blank' });
+		reviewers.push({});
 		// Reassign reviews to itself so that it updates on the page
 		reviewers = reviewers;
-	}
+	};
+	function removeReviewer(reviewer: string) {
+		for(let i = 0; i < reviewers.length; i++){
+			if (reviewers[i].id === reviewer) {
+				reviewers.splice(i, 1);
+			}
+		}
+		reviewers = reviewers;
+	};
 
 	// Initialise blank files under review list or populate if last submission attempt failed
 	let filesUnderReview = form?.filesN ?? [{ id: 'File 1', path: '' }];
@@ -29,6 +35,14 @@
 		// Add a new blank file
 		filesUnderReview.push({ id: 'File ' + (filesUnderReview.length + 1), path: '' });
 		// Ressign to so that it updates on page
+		filesUnderReview = filesUnderReview;
+	};
+	function removeFile(file: string) {
+		for(let i = 0; i < filesUnderReview.length; i++) {
+			if(filesUnderReview[i].id === file) {
+				filesUnderReview.splice(i, 1);
+			}
+		}
 		filesUnderReview = filesUnderReview;
 	}
 
@@ -58,113 +72,121 @@
 </svelte:head>
 
 <main>
-	<h1 class="text-center text-4xl p-4">Submit a Review</h1>
+	<h1 class="text-center text-4xl my-4">Submit a Review</h1>
 
-	<div>
-		{#if form?.submissionFailed}
-			<p>Failed to submit review!</p>
-		{/if}
-		<form
-			action="?/submit"
-			method="POST"
-			autocomplete="off"
-			use:enhance={({ data }) => {
-				data.set('instructions', JSON.stringify(quill.getContents()['ops']));
-			}}
-		>
-			<!-- <form action="?/submit" on:submit|preventDefault={handleSubmit} method="POST"> -->
-			<div class="py-1">
-				<label for="review_title"> Review Title: </label>
-				<!-- Shouldn't need ID but do need name to get formData() on server -->
+	{#if form?.submissionFailed}
+		<p>Failed to submit review!</p>
+	{/if}
+	<form
+		action="?/submit"
+		method="POST"
+		autocomplete="off"
+		use:enhance={({ data }) => {
+			data.set('instructions', JSON.stringify(quill.getContents()['ops']));
+		}}
+		class="mx-2"
+	>
+		<!-- Review title, project and category -->
+		<div class="flex flex-row text-center">
+			<div class="basis-1/2">
 				<input
-					name="review_title"
+					name="title"
 					type="text"
-					value={form?.title ?? ''}
 					required
-					class="border-2 bg-slate-200"
+					value={form?.title ?? ''}
+					placeholder="Review Title"
+					class="input input-primary input-bordered text-center w-full"
 				/>
-
-				<label for="project">Project:</label>
-				<!-- <select name="project" value={form?.project ?? "blank"}> -->
-				<select name="project" bind:value={selectedProject}>
-					<option value="blank">Please choose a project</option>
+			</div>
+			<div class="basis-1/2">
+				<select name="project" class="select select-primary w-1/3">
+					<option value="default">Please choose a project</option>
 					{#each projects as project}
 						<option value={project}>{project}</option>
 					{/each}
 				</select>
 
-				<label for="category">Category:</label>
-				<!-- <select name="category" value={form?.project ?? "blank"}> -->
-				<select name="category" value={selectedCategory}>
-					<option value="blank">Please choose a category</option>
+				<select name="category" class="select select-primary w-1/3">
+					<option value="default">Please choose a category</option>
 					{#each categories as category}
 						<option value={category}>{category}</option>
 					{/each}
 				</select>
-				{#if selectedCategory === 'ECR'}
-					<label for="ecrNumber">ECR Number:</label>
-					<input name="ecrNumber" type="text" required class="border-2 bg-slate-200" />
-				{/if}
+				<!-- {#if selectedCategory === 'ECR'}
+					<p>ECR Number:</p>
+				{/if} -->
+				<!-- TODO: Add element to input RT reference number -->
+			</div>
+		</div>
+
+		<!-- Reviewers and roles -->
+		<div class="my-4">
+			<div class="flex flex-row items-center space-x-4 my-2">
+				<h1 class="text-2xl font-bold">Reviewers</h1>
+				<button type="button" on:click={addReviewer} class="btn btn-sm btn-outline btn-success"
+					>Add reviewer</button
+				>
 			</div>
 
-			<div>
-				<!-- TODO: Allow only one DE and APP, multiple INF and PEER -->
-				<p>Reviewers:</p>
-				{#each reviewers as reviewer, i}
-					<div>
-						<select name="reviewers" bind:value={reviewers[i].id}>
-							<option value="blank">Please choose a reviewer</option>
-							{#each users as user}
-								<option value={user}>{user}</option>
-							{/each}
-						</select>
-						<select name="roles" bind:value={reviewers[i].role}>
-							<option value="blank">Please choose a role</option>
-							{#each roles as role}
-								<option value={role}>{role}</option>
-							{/each}
-						</select>
-					</div>
-				{/each}
-
-				<div>
-					<button
-						type="button"
-						on:click={addReviewer}
-						class="ml-1 rounded-lg border-2 bg-slate-200"
-					>
-						Add reviewer
-					</button>
+			{#each reviewers as reviewer, i}
+				<div class="my-2">
+					<label for={reviewers[i].id} class="mx-2">{i + 1}.</label>
+					<select name="reviewers" bind:value={reviewers[i].id} class="select select-primary">
+						<option value="default">Please choose a reviewer</option>
+						{#each users as user}
+							<option value={user}>{user}</option>
+						{/each}
+					</select>
+					<select name="roles" bind:value={reviewers[i].role} class="select select-primary">
+						<option value="default">Please choose a role</option>
+						{#each roles as role}
+							<option value={role}>{role}</option>
+						{/each}
+					</select>
+					{#if reviewers.length > 1}
+						<button type="button" on:click={removeReviewer(reviewers[i].id)} class="btn btn-sm btn-outline btn-error">Remove reviewer</button>
+					{/if}
 				</div>
-			</div>
+			{/each}
+		</div>
 
-			<div>
-				<p>Files under review</p>
-				{#each filesUnderReview as file, i}
-					<div class="py-1">
-						<label for={filesUnderReview[i].id}>{filesUnderReview[i].id}</label>
-						<input
-							name="files"
-							type="text"
-							bind:value={filesUnderReview[i].path}
-							class="border-2 bg-slate-200"
-						/>
-					</div>
-				{/each}
-				<div>
-					<button type="button" on:click={addFile} class="ml-1 rounded-lg border-2 bg-slate-200">
-						Add file
-					</button>
-				</div>
+		<!-- Files under review -->
+		<div class="my-4">
+			<div class="flex flex-row items-center space-x-4 my-2">
+				<h1 class="text-2xl font-bold">Files Under Review</h1>
+				<button type="button" on:click={addFile} class="btn btn-sm btn-outline btn-success"
+					>Add File</button
+				>
 			</div>
-			<p>Instructions:</p>
-			<!-- <textarea name="instructions">{form?.instructions ?? ''}</textarea> -->
+			{#each filesUnderReview as file, i}
+				<div class="py-1">
+					<label for={filesUnderReview[i].id} class="mx-2">{i + 1}.</label>
+					<input
+						name="files"
+						type="text"
+						bind:value={filesUnderReview[i].path}
+						class="input input-primary input-bordered w-1/2"
+					/>
+					{#if filesUnderReview.length > 1}
+						<button type="button" on:click={removeFile(filesUnderReview[i].id)} class="btn btn-sm btn-outline btn-error">Remove file</button>
+					{/if}
+				</div>
+			{/each}
+		</div>
+
+		<!-- Instructions -->
+		<div class="my-4">
+			<div class="flex flex-row items-center space-x-4 my-2">
+				<h1 class="text-2xl font-bold">Instructions</h1>
+			</div>
 			<div class="editor-wrapper">
 				<div bind:this={editor} />
 			</div>
-			<div>
-				<button type="submit" class="ml-1 rounded-lg border-2 bg-slate-200"> Submit review </button>
-			</div>
-		</form>
-	</div>
+		</div>
+
+		<!-- Submit -->
+		<div class="text-center">
+			<button type="submit" class="btn btn-secondary"> Submit review </button>
+		</div>
+	</form>
 </main>
