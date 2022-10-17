@@ -3,6 +3,8 @@ import { getDocs, collection, query, where } from 'firebase/firestore';
 import { invalid, redirect } from '@sveltejs/kit';
 import type { Action, Actions, PageServerLoad } from './$types';
 
+export const prerender = false;
+
 type Review = {
 	presenter?: string;
 	project?: string;

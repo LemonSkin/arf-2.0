@@ -2,32 +2,39 @@
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
+	import Quill from '$lib/Quill.svelte';
+	// Page data
 	export let data: PageData;
-	$: projects = data.projects;
-	$: categories = data.categories;
-	$: users = data.users;
+	let projects = data.projects;
+	let categories = data.categories;
+	let users = data.users;
+	let roles = data.roles;
+	let user = data.user;
 
-	export let form: ActionData;
-
-	//Used for the roles dropdown list
-	const roles: string[] = ['Design Reviewer', 'Peer Reviewer', 'Approver', 'Information'];
+	// Action response data
+	let form: ActionData;
 
 	// Initialise blank reviewer list or populate if last submission attempt failed
-	export let reviewers = form?.reviewersN ?? [{}];
+	let reviewers = form?.reviewersN ?? [{}];
 	function addReviewer() {
 		// Add a new blank reviewer
 		reviewers.push({});
 		// Reassign reviews to itself so that it updates on the page
 		reviewers = reviewers;
-	};
+		// TODO: Remove already selected reviewers from list of reviewer candidates
+	}
+
 	function removeReviewer(reviewer: string) {
-		for(let i = 0; i < reviewers.length; i++){
-			if (reviewers[i].id === reviewer) {
+		// console.log(reviewers);
+		for (let i = 0; i < reviewers.length; i++) {
+			if (reviewers[i].id == reviewer) {
 				reviewers.splice(i, 1);
+				break;
 			}
 		}
 		reviewers = reviewers;
-	};
+		// TODO: When reviewer removed, add back to list of reviewer candidates
+	}
 
 	// Initialise blank files under review list or populate if last submission attempt failed
 	let filesUnderReview = form?.filesN ?? [{ id: 'File 1', path: '' }];
@@ -36,43 +43,26 @@
 		filesUnderReview.push({ id: 'File ' + (filesUnderReview.length + 1), path: '' });
 		// Ressign to so that it updates on page
 		filesUnderReview = filesUnderReview;
-	};
+	}
 	function removeFile(file: string) {
-		for(let i = 0; i < filesUnderReview.length; i++) {
-			if(filesUnderReview[i].id === file) {
+		for (let i = 0; i < filesUnderReview.length; i++) {
+			if (filesUnderReview[i].id === file) {
 				filesUnderReview.splice(i, 1);
+				break;
 			}
 		}
 		filesUnderReview = filesUnderReview;
 	}
 
-	let editor;
-	let quill;
-	let toolbarOptions = [
-		[{ header: 1 }, { header: 2 }, 'blockquote', 'link'],
-		['bold', 'italic', 'underline', 'strike'],
-		[{ list: 'ordered' }, { list: 'bullet' }],
-		[{ align: [] }],
-		['clean']
-	];
-	onMount(async () => {
-		const { default: Quill } = await import('quill');
-		quill = new Quill(editor, {
-			modules: {
-				toolbar: toolbarOptions
-			},
-			theme: 'snow',
-			placeholder: 'Instructions'
-		});
-	});
+	let instructions: string;
 </script>
 
 <svelte:head>
 	<link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
 </svelte:head>
 
-<main>
-	<h1 class="text-center text-4xl my-4">Submit a Review</h1>
+<main class="mx-2">
+	<h1 class="my-4 text-center text-4xl">Submit a Review</h1>
 
 	{#if form?.submissionFailed}
 		<p>Failed to submit review!</p>
@@ -82,9 +72,9 @@
 		method="POST"
 		autocomplete="off"
 		use:enhance={({ data }) => {
-			data.set('instructions', JSON.stringify(quill.getContents()['ops']));
+			// console.log(instructions);
+			data.set('instructions', instructions);
 		}}
-		class="mx-2"
 	>
 		<!-- Review title, project and category -->
 		<div class="flex flex-row text-center">
@@ -95,7 +85,7 @@
 					required
 					value={form?.title ?? ''}
 					placeholder="Review Title"
-					class="input input-primary input-bordered text-center w-full"
+					class="input input-bordered input-primary w-full text-center"
 				/>
 			</div>
 			<div class="basis-1/2">
@@ -112,29 +102,35 @@
 						<option value={category}>{category}</option>
 					{/each}
 				</select>
+				<!-- TODO: Add element to input RT reference number -->
 				<!-- {#if selectedCategory === 'ECR'}
 					<p>ECR Number:</p>
 				{/if} -->
-				<!-- TODO: Add element to input RT reference number -->
 			</div>
 		</div>
 
 		<!-- Reviewers and roles -->
 		<div class="my-4">
-			<div class="flex flex-row items-center space-x-4 my-2">
+			<div class="my-2 flex flex-row items-center space-x-4">
 				<h1 class="text-2xl font-bold">Reviewers</h1>
-				<button type="button" on:click={addReviewer} class="btn btn-sm btn-outline btn-success"
+				<button type="button" on:click={addReviewer} class="btn btn-outline btn-success btn-sm"
 					>Add reviewer</button
 				>
 			</div>
 
+			<!-- TODO: Add conditions to remove name from list if already selected -->
 			{#each reviewers as reviewer, i}
 				<div class="my-2">
 					<label for={reviewers[i].id} class="mx-2">{i + 1}.</label>
 					<select name="reviewers" bind:value={reviewers[i].id} class="select select-primary">
 						<option value="default">Please choose a reviewer</option>
 						{#each users as user}
-							<option value={user}>{user}</option>
+							<!-- Check if user has an alias, otherwise use user id -->
+							{#if user.alias}
+								<option value={user.id}>{user.alias}</option>
+							{:else}
+								<option value={user.id}>{user.id}</option>
+							{/if}
 						{/each}
 					</select>
 					<select name="roles" bind:value={reviewers[i].role} class="select select-primary">
@@ -144,7 +140,11 @@
 						{/each}
 					</select>
 					{#if reviewers.length > 1}
-						<button type="button" on:click={removeReviewer(reviewers[i].id)} class="btn btn-sm btn-outline btn-error">Remove reviewer</button>
+						<button
+							type="button"
+							on:click={removeReviewer(reviewers[i].id)}
+							class="btn btn-outline btn-error btn-sm">Remove reviewer</button
+						>
 					{/if}
 				</div>
 			{/each}
@@ -152,9 +152,9 @@
 
 		<!-- Files under review -->
 		<div class="my-4">
-			<div class="flex flex-row items-center space-x-4 my-2">
+			<div class="my-2 flex flex-row items-center space-x-4">
 				<h1 class="text-2xl font-bold">Files Under Review</h1>
-				<button type="button" on:click={addFile} class="btn btn-sm btn-outline btn-success"
+				<button type="button" on:click={addFile} class="btn btn-outline btn-success btn-sm"
 					>Add File</button
 				>
 			</div>
@@ -165,10 +165,14 @@
 						name="files"
 						type="text"
 						bind:value={filesUnderReview[i].path}
-						class="input input-primary input-bordered w-1/2"
+						class="input input-bordered input-primary w-1/2"
 					/>
 					{#if filesUnderReview.length > 1}
-						<button type="button" on:click={removeFile(filesUnderReview[i].id)} class="btn btn-sm btn-outline btn-error">Remove file</button>
+						<button
+							type="button"
+							on:click={removeFile(filesUnderReview[i].id)}
+							class="btn btn-outline btn-error btn-sm">Remove file</button
+						>
 					{/if}
 				</div>
 			{/each}
@@ -176,11 +180,11 @@
 
 		<!-- Instructions -->
 		<div class="my-4">
-			<div class="flex flex-row items-center space-x-4 my-2">
+			<div class="my-2 flex flex-row items-center space-x-4">
 				<h1 class="text-2xl font-bold">Instructions</h1>
 			</div>
-			<div class="editor-wrapper">
-				<div bind:this={editor} />
+			<div>
+				<Quill bind:html={instructions} />
 			</div>
 		</div>
 

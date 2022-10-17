@@ -2,7 +2,7 @@
 </script>
 
 <footer
-	class="fixed bottom-0 left-0 w-full flex p-2 bg-gradient-to-r from-airbus-blue to-airbus-blue-light2 text-white"
+	class="fixed bottom-0 left-0 flex w-full bg-gradient-to-r from-airbus-blue to-airbus-blue-light2 p-2 text-white"
 >
 	<span class="text-sm">© 2022 Matthew C. Scriven. All Rights Reserved. </span>
 </footer>

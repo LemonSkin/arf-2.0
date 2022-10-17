@@ -4,6 +4,7 @@ import type { Action, Actions, PageServerLoad } from './$types';
 import { db } from '$lib/database';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
+export const prerender = false;
 // enum Roles {
 // 	ADMIN = 'ADMIN',
 // 	USER = 'USER',

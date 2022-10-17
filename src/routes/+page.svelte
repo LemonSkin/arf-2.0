@@ -10,13 +10,13 @@
 	}
 </script>
 
-<h1 class="text-center text-4xl text-gray-900 my-4">Welcome to Artefact Review System Extended</h1>
+<h1 class="my-4 text-center text-4xl text-gray-900">Welcome to Artefact Review System Extended</h1>
 
 <div class="mx-3 my-3">
 	<p>Items to review</p>
 	{#each reviewing as review}
 		<form method="POST" action="?/review">
-			<button type="submit" class="btn btn-accent btn-block text-left justify-start">
+			<button type="submit" class="btn btn-accent btn-block justify-start text-left">
 				<input type="hidden" name="title" value={review.title} />
 				<div>
 					<p name="revTitle">Title: {review.title}</p>
