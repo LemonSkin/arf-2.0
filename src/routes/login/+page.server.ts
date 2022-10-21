@@ -67,6 +67,7 @@ const login: Action = async ({ cookies, request }) => {
 
 		throw redirect(303, '/');
 	}
+	console.log('on server');
 	//Return the username so that the form repopulates
 	return invalid(400, { username, error: true, message: 'Details incorrect.' });
 };

@@ -29,7 +29,13 @@
 					<button type="submit">Log out</button>
 				</form>
 				{#if $page.data.user.role === 'admin'}
-					<p class="hover:text-red-500">Admin</p>
+					<div class="dropdown-hover dropdown">
+						<a href="/test-area">Test Area</a>
+						<ul class="dropdown-content menu rounded-box w-52 bg-accent p-2 shadow">
+							<li><a href="/test-area/quill-test">Quill</a></li>
+							<li><a href="/test-area/add-remove-users">Add/Remove Users</a></li>
+						</ul>
+					</div>
 				{/if}
 			{/if}
 		</div>

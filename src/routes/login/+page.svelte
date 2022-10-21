@@ -2,6 +2,7 @@
 	// import { enhance } from '$app/forms'
 	import Alert from '$lib/Alert.svelte';
 	import type { ActionData } from './$types';
+	import { enhance } from '$app/forms';
 
 	export let form: ActionData;
 	let alertRef;
@@ -10,7 +11,19 @@
 <main>
 	<h1 class="my-4 text-center text-4xl text-gray-900">Log In/Register</h1>
 
-	<form method="POST" autocomplete="off">
+	<form
+		method="POST"
+		autocomplete="off"
+		use:enhance={({ data, form }) => {
+			data.set('instructions', 'hello');
+			return async ({ result, update }) => {
+				if (result.type === 'invalid') {
+					console.log('invalid!');
+				}
+				update();
+			};
+		}}
+	>
 		<div class="flex flex-row items-center">
 			<div class="flex basis-1/4 justify-center" />
 

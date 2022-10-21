@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import { enhance } from '$app/forms';
-	import { onMount } from 'svelte';
+	import { applyAction, enhance } from '$app/forms';
 	import Quill from '$lib/Quill.svelte';
+	import Alert from '$lib/Alert.svelte';
+
 	// Page data
 	export let data: PageData;
 	let projects = data.projects;
@@ -12,7 +13,7 @@
 	let user = data.user;
 
 	// Action response data
-	let form: ActionData;
+	export let form: ActionData;
 
 	// Initialise blank reviewer list or populate if last submission attempt failed
 	let reviewers = form?.reviewersN ?? [{}];
@@ -54,28 +55,35 @@
 		filesUnderReview = filesUnderReview;
 	}
 
-	let instructions: string;
+	let instructions = {};
 </script>
 
-<svelte:head>
+<!-- <svelte:head>
 	<link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
-</svelte:head>
+</svelte:head> -->
 
 <main class="mx-2">
 	<h1 class="my-4 text-center text-4xl">Submit a Review</h1>
 
-	{#if form?.submissionFailed}
-		<p>Failed to submit review!</p>
-	{/if}
 	<form
 		action="?/submit"
 		method="POST"
 		autocomplete="off"
 		use:enhance={({ data }) => {
-			// console.log(instructions);
-			data.set('instructions', instructions);
+			data.set('instructions', JSON.stringify(instructions));
+			// return async ({ result, update }) => {
+			// 	if (result.type === 'invalid') {
+			// 		console.log('hello');
+			// 	}
+			// 	update();
+			// };
 		}}
 	>
+		<div>
+			{#if form?.error}
+				<Alert message={form?.message} />
+			{/if}
+		</div>
 		<!-- Review title, project and category -->
 		<div class="flex flex-row text-center">
 			<div class="basis-1/2">
@@ -183,9 +191,7 @@
 			<div class="my-2 flex flex-row items-center space-x-4">
 				<h1 class="text-2xl font-bold">Instructions</h1>
 			</div>
-			<div>
-				<Quill bind:html={instructions} />
-			</div>
+			<div><Quill bind:editorContents={instructions} /></div>
 		</div>
 
 		<!-- Submit -->

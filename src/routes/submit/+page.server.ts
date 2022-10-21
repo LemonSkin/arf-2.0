@@ -4,6 +4,7 @@ import { db } from '$lib/database';
 import { getDocs, collection, doc, getDoc, setDoc } from 'firebase/firestore';
 
 let user: string;
+export const prerender = false;
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.user === undefined) {
@@ -46,6 +47,7 @@ const submit: Action = async ({ request }) => {
 	const files = data.getAll('files');
 	const instructions = data.get('instructions');
 	const presenter: string = user;
+	console.log(instructions);
 
 	const reviewersN: any = [];
 	let approver = null;
@@ -74,8 +76,10 @@ const submit: Action = async ({ request }) => {
 		project === 'default' ||
 		category === 'default' ||
 		reviewers.includes('default') ||
-		reviewRoles.includes('default')
+		reviewRoles.includes('default') ||
+		title.length < 3
 	) {
+		console.log('submission failed');
 		return invalid(400, {
 			reviewersN,
 			filesN,
@@ -84,18 +88,17 @@ const submit: Action = async ({ request }) => {
 			project,
 			instructions,
 			error: true,
-			message: 'Cannot submit with default values!'
+			message: 'Cannot submit with default values!',
+			submissionFailed: true
 		});
 	}
 
-	if (title.length < 3) {
-		return invalid(400, { reviewersN, filesN, title, category, project, submissionFailed: true });
-	}
+	// if (title.length < 3) {
+	// 	return invalid(400, { reviewersN, filesN, title, category, project, submissionFailed: true });
+	// }
 
 	const categoryPath = String('projects/' + project + '/categories/' + category).toLowerCase();
-	// const categoryPath = String('projects/SUS05/categories/CUT').toLowerCase();
 
-	// console.log(categoryPath);
 	const categoryRef = doc(db, categoryPath);
 	const docSnap = await getDoc(categoryRef);
 	let categoryCount = 0;
@@ -162,10 +165,20 @@ const submit: Action = async ({ request }) => {
 	});
 
 	console.log('redirecting...');
-	// throw redirect(302, '/');
 	return invalid(400, {
-		submissionFailed: true
+		reviewersN,
+		filesN,
+		title,
+		category,
+		project,
+		instructions,
+		submissionFailed: true,
+		error: 'REEE'
 	});
+	throw redirect(302, '/');
+	// return invalid(400, {
+	// 	submissionFailed: true
+	// });
 };
 
 export const actions: Actions = { submit };
