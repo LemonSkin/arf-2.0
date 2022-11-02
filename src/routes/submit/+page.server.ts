@@ -165,16 +165,16 @@ const submit: Action = async ({ request }) => {
 	});
 
 	console.log('redirecting...');
-	return invalid(400, {
-		reviewersN,
-		filesN,
-		title,
-		category,
-		project,
-		instructions,
-		submissionFailed: true,
-		error: 'REEE'
-	});
+	// return invalid(400, {
+	// 	reviewersN,
+	// 	filesN,
+	// 	title,
+	// 	category,
+	// 	project,
+	// 	instructions,
+	// 	submissionFailed: true,
+	// 	error: 'REEE'
+	// });
 	throw redirect(302, '/');
 	// return invalid(400, {
 	// 	submissionFailed: true
